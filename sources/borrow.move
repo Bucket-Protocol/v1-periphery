@@ -18,16 +18,16 @@ module bucket_periphery::borrow {
         oracle: &PriceFeed<T>,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
-        collateral_ratio: u64,
+        expected_buck_amount: u64,
         prev_debtor: Option<address>,
-        ctx: &mut TxContext
+        ctx: &mut TxContext,
     ) {
         let sui_coin = vector::pop_back(&mut collateral_coins);
         pay::join_vec(&mut sui_coin, collateral_coins);
         let sui_input = balance::split(coin::balance_mut(&mut sui_coin), collateral_amount);
 
         let borrower = tx_context::sender(ctx);
-        let buck = buck::borrow<T>(protocol, oracle, sui_input, collateral_ratio, prev_debtor, ctx);
+        let buck = buck::borrow<T>(protocol, oracle, sui_input, expected_buck_amount, prev_debtor, ctx);
         transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
         transfer::public_transfer(sui_coin, borrower);
     }
@@ -37,7 +37,7 @@ module bucket_periphery::borrow {
         oracle: &PriceFeed<T>,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
-        collateral_ratio: u64,
+        expected_buck_amount: u64,
         ctx: &mut TxContext,
     ) {
         let sui_coin = vector::pop_back(&mut collateral_coins);
@@ -47,7 +47,7 @@ module bucket_periphery::borrow {
         let borrower = tx_context::sender(ctx);
 
         let buck = buck::auto_insert_borrow(
-            protocol, oracle, sui_input, collateral_ratio, ctx
+            protocol, oracle, sui_input, expected_buck_amount, ctx
         );
         transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
         transfer::public_transfer(sui_coin, borrower);
@@ -76,21 +76,25 @@ module bucket_periphery::borrow {
         let (protocol, well) = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = mock_oracle::new_for_testing<SUI>(2000, 1000, test_scenario::ctx(scenario));
 
+        let sui_input_amount = 1000000;
+        let buck_output_amount = 1200000;
+
         test_scenario::next_tx(scenario, borrower);
         {
-            let sui_input = balance::create_for_testing<SUI>(2000000);
+            let sui_input = balance::create_for_testing<SUI>(sui_input_amount * 3);
             let sui_input = vector[coin::from_balance(sui_input, test_scenario::ctx(scenario))];
-            auto_insert_borrow(&mut protocol, &oracle, sui_input, 1000000, 125, test_scenario::ctx(scenario));
-            debug::print(&test_scenario::ids_for_sender<Coin<SUI>>(scenario));
+            auto_insert_borrow(&mut protocol, &oracle, sui_input, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, borrower);
         {
-            let sui_output = test_scenario::take_from_sender<Coin<SUI>>(scenario);
+            let sui_remain = test_scenario::take_from_sender<Coin<SUI>>(scenario);
             let buck_output = test_scenario::take_from_sender<Coin<BUCK>>(scenario);
-            debug::print(&sui_output);
+            debug::print(&sui_remain);
             debug::print(&buck_output);
-            test_scenario::return_to_sender(scenario, sui_output);
+            test_utils::assert_eq(coin::value(&sui_remain), sui_input_amount * 2);
+            test_utils::assert_eq(coin::value(&buck_output), buck_output_amount);
+            test_scenario::return_to_sender(scenario, sui_remain);
             test_scenario::return_to_sender(scenario, buck_output);
         };
 
