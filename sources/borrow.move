@@ -28,7 +28,11 @@ module bucket_periphery::borrow {
 
         let borrower = tx_context::sender(ctx);
         let buck = buck::borrow<T>(protocol, oracle, sui_input, expected_buck_amount, prev_debtor, ctx);
-        transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
+        if (balance::value(&buck) == 0) {
+            balance::destroy_zero(buck);
+        } else {
+            transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
+        };
         transfer::public_transfer(sui_coin, borrower);
     }
 
@@ -49,7 +53,11 @@ module bucket_periphery::borrow {
         let buck = buck::auto_insert_borrow(
             protocol, oracle, sui_input, expected_buck_amount, ctx
         );
-        transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
+        if (balance::value(&buck) == 0) {
+            balance::destroy_zero(buck);
+        } else {
+            transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
+        };
         transfer::public_transfer(sui_coin, borrower);
     }
 
@@ -68,7 +76,8 @@ module bucket_periphery::borrow {
         use std::debug;
 
         let dev = @0xde1;
-        let borrower = @0x111;
+        let borrower_1 = @0x111;
+        let borrower_2 = @0x222;
 
         let scenario_val = test_scenario::begin(dev);
         let scenario = &mut scenario_val;
@@ -76,17 +85,19 @@ module bucket_periphery::borrow {
         let (protocol, well) = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = mock_oracle::new_for_testing<SUI>(2000, 1000, test_scenario::ctx(scenario));
 
+        test_utils::print(b"--- Borrower 1 ---");
+
         let sui_input_amount = 1000000;
         let buck_output_amount = 1200000;
 
-        test_scenario::next_tx(scenario, borrower);
+        test_scenario::next_tx(scenario, borrower_1);
         {
             let sui_input = balance::create_for_testing<SUI>(sui_input_amount * 3);
             let sui_input = vector[coin::from_balance(sui_input, test_scenario::ctx(scenario))];
             auto_insert_borrow(&mut protocol, &oracle, sui_input, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, borrower);
+        test_scenario::next_tx(scenario, borrower_1);
         {
             let sui_remain = test_scenario::take_from_sender<Coin<SUI>>(scenario);
             let buck_output = test_scenario::take_from_sender<Coin<BUCK>>(scenario);
@@ -97,6 +108,30 @@ module bucket_periphery::borrow {
             test_scenario::return_to_sender(scenario, sui_remain);
             test_scenario::return_to_sender(scenario, buck_output);
         };
+
+        test_utils::print(b"--- Borrower 2 ---");
+
+        let sui_input_amount = 2000;
+        let buck_output_amount = 0;
+
+        test_scenario::next_tx(scenario, borrower_2);
+        {
+            let sui_input = balance::create_for_testing<SUI>(sui_input_amount*3/2);
+            let sui_input = vector[coin::from_balance(sui_input, test_scenario::ctx(scenario))];
+            auto_insert_borrow(&mut protocol, &oracle, sui_input, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, borrower_2);
+        {
+            let sui_remain = test_scenario::take_from_sender<Coin<SUI>>(scenario);
+            let buck_coin_vec = test_scenario::ids_for_sender<Coin<BUCK>>(scenario);
+            debug::print(&sui_remain);
+            debug::print(&buck_coin_vec);
+            test_utils::assert_eq(coin::value(&sui_remain), sui_input_amount / 2);
+            test_utils::assert_eq(std::vector::length(&buck_coin_vec), 0);
+            test_scenario::return_to_sender(scenario, sui_remain);
+        };
+
 
         mock_oracle::destroy_for_testing(oracle, ocap);
         test_scenario::end(scenario_val);
