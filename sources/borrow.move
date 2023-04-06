@@ -6,34 +6,31 @@ module bucket_periphery::borrow {
     use std::option::Option;
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Self, Coin};
-    use sui::transfer;
     use sui::pay;
     use sui::balance;
 
     use bucket_protocol::buck::{Self, BucketProtocol};
     use bucket_protocol::mock_oracle::PriceFeed;
+    use bucket_framework::utils;
 
     public entry fun borrow<T>(
         protocol: &mut BucketProtocol,
         oracle: &PriceFeed<T>,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
-        expected_buck_amount: u64,
+        output_buck_amount: u64,
         prev_debtor: Option<address>,
         ctx: &mut TxContext,
     ) {
-        let sui_coin = vector::pop_back(&mut collateral_coins);
-        pay::join_vec(&mut sui_coin, collateral_coins);
-        let sui_input = balance::split(coin::balance_mut(&mut sui_coin), collateral_amount);
+        let collateral_coin = vector::pop_back(&mut collateral_coins);
+        pay::join_vec(&mut collateral_coin, collateral_coins);
+        let collateral_input = balance::split(coin::balance_mut(&mut collateral_coin), collateral_amount);
 
         let borrower = tx_context::sender(ctx);
-        let buck = buck::borrow<T>(protocol, oracle, sui_input, expected_buck_amount, prev_debtor, ctx);
-        if (balance::value(&buck) == 0) {
-            balance::destroy_zero(buck);
-        } else {
-            transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
-        };
-        transfer::public_transfer(sui_coin, borrower);
+        let buck = buck::borrow<T>(protocol, oracle, collateral_input, output_buck_amount, prev_debtor, ctx);
+
+        utils::transfer_non_zero_balance(buck, borrower, ctx);
+        utils::transfer_non_zero_coin(collateral_coin, borrower);
     }
 
     public entry fun auto_insert_borrow<T>(
@@ -41,31 +38,27 @@ module bucket_periphery::borrow {
         oracle: &PriceFeed<T>,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
-        expected_buck_amount: u64,
+        output_buck_amount: u64,
         ctx: &mut TxContext,
     ) {
-        let sui_coin = vector::pop_back(&mut collateral_coins);
-        pay::join_vec(&mut sui_coin, collateral_coins);
-        let sui_input = balance::split(coin::balance_mut(&mut sui_coin), collateral_amount);
+        let collateral_coin = vector::pop_back(&mut collateral_coins);
+        pay::join_vec(&mut collateral_coin, collateral_coins);
+        let collateral_input = balance::split(coin::balance_mut(&mut collateral_coin), collateral_amount);
 
         let borrower = tx_context::sender(ctx);
 
         let buck = buck::auto_insert_borrow(
-            protocol, oracle, sui_input, expected_buck_amount, ctx
+            protocol, oracle, collateral_input, output_buck_amount, ctx
         );
-        if (balance::value(&buck) == 0) {
-            balance::destroy_zero(buck);
-        } else {
-            transfer::public_transfer(coin::from_balance(buck, ctx), borrower);
-        };
-        transfer::public_transfer(sui_coin, borrower);
+
+        utils::transfer_non_zero_balance(buck, borrower, ctx);
+        utils::transfer_non_zero_coin(collateral_coin, borrower);
     }
 
     #[test_only]
-    use bucket_protocol::well::{Well};
-    
-    #[test_only]
     use sui::sui::SUI;
+    #[test_only]
+    use bucket_protocol::well::{Well};
 
     #[test]
     fun test_auto_insert_borrow(): (BucketProtocol, Well<SUI>) {
@@ -82,7 +75,7 @@ module bucket_periphery::borrow {
         let scenario_val = test_scenario::begin(dev);
         let scenario = &mut scenario_val;
 
-        let (protocol, well) = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
+        let (protocol, well) = buck::new_for_testing<SUI>(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = mock_oracle::new_for_testing<SUI>(2000, 1000, test_scenario::ctx(scenario));
 
         test_utils::print(b"--- Borrower 1 ---");
@@ -131,7 +124,6 @@ module bucket_periphery::borrow {
             test_utils::assert_eq(std::vector::length(&buck_coin_vec), 0);
             test_scenario::return_to_sender(scenario, sui_remain);
         };
-
 
         mock_oracle::destroy_for_testing(oracle, ocap);
         test_scenario::end(scenario_val);
