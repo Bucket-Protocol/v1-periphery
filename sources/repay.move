@@ -6,8 +6,8 @@ module bucket_periphery::repay {
     use sui::pay;
     use sui::tx_context::{Self, TxContext};
 
-    use bucket_framework::utils;
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
+    use bucket_periphery::utils;
 
     public entry fun repay<T>(
         protocol: &mut BucketProtocol,

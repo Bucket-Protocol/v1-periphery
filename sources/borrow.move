@@ -11,7 +11,7 @@ module bucket_periphery::borrow {
 
     use bucket_protocol::buck::{Self, BucketProtocol};
     use bucket_protocol::mock_oracle::PriceFeed;
-    use bucket_framework::utils;
+    use bucket_periphery::utils;
 
     public entry fun borrow<T>(
         protocol: &mut BucketProtocol,
