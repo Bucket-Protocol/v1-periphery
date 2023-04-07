@@ -47,7 +47,7 @@ module bucket_periphery::borrow {
 
         let borrower = tx_context::sender(ctx);
 
-        let buck = buck::auto_insert_borrow(
+        let buck = buck::auto_borrow(
             protocol, oracle, collateral_input, output_buck_amount, ctx
         );
 
@@ -57,11 +57,9 @@ module bucket_periphery::borrow {
 
     #[test_only]
     use sui::sui::SUI;
-    #[test_only]
-    use bucket_protocol::well::{Well};
 
     #[test]
-    fun test_auto_insert_borrow(): (BucketProtocol, Well<SUI>) {
+    fun test_auto_insert_borrow(): BucketProtocol {
         use sui::test_scenario;
         use sui::test_utils;
         use bucket_protocol::mock_oracle;
@@ -75,7 +73,7 @@ module bucket_periphery::borrow {
         let scenario_val = test_scenario::begin(dev);
         let scenario = &mut scenario_val;
 
-        let (protocol, well) = buck::new_for_testing<SUI>(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
+        let protocol = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = mock_oracle::new_for_testing<SUI>(2000, 1000, test_scenario::ctx(scenario));
 
         test_utils::print(b"--- Borrower 1 ---");
@@ -127,6 +125,6 @@ module bucket_periphery::borrow {
 
         mock_oracle::destroy_for_testing(oracle, ocap);
         test_scenario::end(scenario_val);
-        (protocol, well)
+        protocol
     }
 }
