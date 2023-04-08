@@ -9,6 +9,8 @@ module bucket_periphery::repay {
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
     use bucket_periphery::utils;
 
+    const ENotEnoughBuck: u64 = 0;
+
     public entry fun repay<T>(
         protocol: &mut BucketProtocol,
         buck_coins: vector<Coin<BUCK>>,
@@ -23,6 +25,7 @@ module bucket_periphery::repay {
             buck_amount = debt_amount;
         };
 
+        assert!(coin::value(&buck_coin) >= buck_amount, ENotEnoughBuck);
         let buck_input = balance::split(coin::balance_mut(&mut buck_coin), buck_amount);
         let collateral_return = buck::repay<T>(protocol, buck_input, ctx);
 
@@ -30,12 +33,14 @@ module bucket_periphery::repay {
         utils::transfer_non_zero_coin(buck_coin, debtor);
     }
 
+    #[test_only]
+    use bucket_oracle::oracle::{Self, Oracle, AdminCap};
+
     #[test]
-    fun test_repay(): BucketProtocol {
+    fun test_repay(): (BucketProtocol, Oracle, AdminCap) {
         use sui::test_scenario;
         use sui::test_utils;
         use sui::sui::SUI;
-        use bucket_protocol::mock_oracle;
         use bucket_protocol::buck::BUCK;
         use std::debug;
         use bucket_periphery::borrow;
@@ -47,21 +52,27 @@ module bucket_periphery::repay {
         let scenario = &mut scenario_val;
 
         let protocol = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
-        let (oracle, ocap) = mock_oracle::new_for_testing<SUI>(2000, 1000, test_scenario::ctx(scenario));
+        let (oracle, ocap) = oracle::new_for_testing<SUI>(1000, test_scenario::ctx(scenario));
 
         let sui_input_amount = 1000000;
         let buck_output_amount = 1200000;
 
         test_scenario::next_tx(scenario, borrower);
         {
+            oracle::update_price<SUI>(&ocap, &mut oracle, 2000);
             let sui_input = balance::create_for_testing<SUI>(sui_input_amount*3/2);
             let sui_coins = vector[coin::from_balance(sui_input, test_scenario::ctx(scenario))];
-            borrow::auto_insert_borrow(&mut protocol, &oracle, sui_coins, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
+            borrow::auto_borrow(&mut protocol, &oracle, sui_coins, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, borrower);
         {
-            let buck_coins = vector[test_scenario::take_from_sender<Coin<BUCK>>(scenario)];
+            let buck_coins = vector[
+                // borrowed buck
+                test_scenario::take_from_sender<Coin<BUCK>>(scenario),
+                // fee
+                coin::from_balance(balance::create_for_testing<BUCK>(buck_output_amount * 5 / 1000), test_scenario::ctx(scenario)),
+            ];
             repay<SUI>(&mut protocol, buck_coins, buck_output_amount, test_scenario::ctx(scenario));
         };
 
@@ -71,13 +82,12 @@ module bucket_periphery::repay {
             let buck_coin_ids = test_scenario::ids_for_sender<Coin<BUCK>>(scenario);
             debug::print(&sui_return);
             debug::print(&buck_coin_ids);
-            assert!(coin::value(&sui_return) == sui_input_amount, 0);
-            assert!(vector::length(&buck_coin_ids) == 0, 1);
+            test_utils::assert_eq(coin::value(&sui_return), sui_input_amount);
+            test_utils::assert_eq(vector::length(&buck_coin_ids), 0);
             test_scenario::return_to_sender(scenario, sui_return);
         };
 
-        mock_oracle::destroy_for_testing(oracle, ocap);
         test_scenario::end(scenario_val);
-        protocol
+        (protocol, oracle, ocap)
     }
 }
