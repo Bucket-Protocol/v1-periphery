@@ -10,13 +10,13 @@ and find the package ID and object IDs of BucketProtocol and BucketOracle
 ### Testnet
 Package ID
 ```
-0x7233764fe2b7969bf6e30f9e1abe2e12d75960dd9104c8d25db0c46b659efdda
+0xdc54ff24c94cb62691b7029f7281bb9e3192594fe02df2a6f8fa019eb141a797
 ```
 Bucket Protocol ID
 ```
-0xbc781ab05a079f93242ec514bac24201ee4bf9b854132c207afcceec491015bc
+0x160f163732ffff4bc10ee30fcc4c8c1a554f264880bf8575528ddf450c6229f9
 ```
 Bucket Oracle ID
 ```
-0xc6b7ef0bd0613ecd9f50f043a5c4ff3dffb58b25737b7cda30e96d43c4541a49
+0x5d552a9bd3162633c6990b8f8cbdc3a4280eec3687cdcb05984a977f0eccea90
 ```
