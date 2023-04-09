@@ -17,11 +17,20 @@ dependencies = [
 ]
 
 [[move.package]]
+name = "BucketOracle"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "main", subdir = "" }
+
+dependencies = [
+  { name = "Sui" },
+]
+
+[[move.package]]
 name = "BucketProtocol"
 source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "main", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
+  { name = "BucketOracle" },
   { name = "Sui" },
 ]
 

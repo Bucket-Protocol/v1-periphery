@@ -2,70 +2,70 @@ module bucket_periphery::borrow {
 
     // Dependecies
 
-    use std::vector;
     use std::option::Option;
     use sui::tx_context::{Self, TxContext};
-    use sui::coin::{Self, Coin};
-    use sui::pay;
-    use sui::balance;
+    use sui::coin::Coin;
 
     use bucket_protocol::buck::{Self, BucketProtocol};
-    use bucket_oracle::oracle::Oracle;
+    use bucket_oracle::oracle::BucketOracle;
     use bucket_periphery::utils;
-
-    const ECollateralNotEnough: u64 = 0;
 
     public entry fun borrow<T>(
         protocol: &mut BucketProtocol,
-        oracle: &Oracle,
+        oracle: &BucketOracle,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
         output_buck_amount: u64,
         prev_debtor: Option<address>,
         ctx: &mut TxContext,
     ) {
-        let collateral_coin = vector::pop_back(&mut collateral_coins);
-        pay::join_vec(&mut collateral_coin, collateral_coins);
-        assert!(coin::value(&collateral_coin) >= collateral_amount, ECollateralNotEnough);
-        let collateral_input = balance::split(coin::balance_mut(&mut collateral_coin), collateral_amount);
+        let (
+            remaining,
+            collateral_input
+        ) = utils::merge_and_split_into_balance<T>(collateral_coins, collateral_amount);
 
         let borrower = tx_context::sender(ctx);
-        let buck = buck::borrow<T>(protocol, oracle, collateral_input, output_buck_amount, prev_debtor, ctx);
+        let buck = buck::borrow<T>(
+            protocol, oracle, collateral_input, output_buck_amount, prev_debtor, ctx
+        );
 
         utils::transfer_non_zero_balance(buck, borrower, ctx);
-        utils::transfer_non_zero_coin(collateral_coin, borrower);
+        utils::transfer_non_zero_coin(remaining, borrower);
     }
 
     public entry fun auto_borrow<T>(
         protocol: &mut BucketProtocol,
-        oracle: &Oracle,
+        oracle: &BucketOracle,
         collateral_coins: vector<Coin<T>>,
         collateral_amount: u64,
         output_buck_amount: u64,
         ctx: &mut TxContext,
     ) {
-        let collateral_coin = vector::pop_back(&mut collateral_coins);
-        pay::join_vec(&mut collateral_coin, collateral_coins);
-        let collateral_input = balance::split(coin::balance_mut(&mut collateral_coin), collateral_amount);
+        let (
+            remaining,
+            collateral_input
+        ) = utils::merge_and_split_into_balance<T>(collateral_coins, collateral_amount);
 
         let borrower = tx_context::sender(ctx);
-
         let buck = buck::auto_borrow(
             protocol, oracle, collateral_input, output_buck_amount, ctx
         );
 
         utils::transfer_non_zero_balance(buck, borrower, ctx);
-        utils::transfer_non_zero_coin(collateral_coin, borrower);
+        utils::transfer_non_zero_coin(remaining, borrower);
     }
 
     #[test_only]
     use sui::sui::SUI;
-
     #[test_only]
     use bucket_oracle::oracle::{Self, AdminCap};
+    #[test_only]
+    use sui::coin;
+    #[test_only]
+    use sui::balance;
 
     #[test]
-    fun test_auto_borrow(): (BucketProtocol, Oracle, AdminCap) {
+    fun test_auto_borrow(): (BucketProtocol, BucketOracle, AdminCap) {
         use sui::test_scenario;
         use sui::test_utils;
         use bucket_protocol::buck::BUCK;
