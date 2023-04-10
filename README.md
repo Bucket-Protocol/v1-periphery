@@ -1,4 +1,4 @@
-# v1-periphery
+# Bucket Periphery
 Entry functions for [frontend](https://bucketprotocol.io/)
 
 ### Localnet
@@ -10,11 +10,11 @@ and find the package ID and object IDs of BucketProtocol and BucketOracle
 ### Testnet
 Package ID
 ```
-0xdc54ff24c94cb62691b7029f7281bb9e3192594fe02df2a6f8fa019eb141a797
+0xd5aaeae9aa72f7f1690f76383ea2860f901b3bb527cb0b85e51ec9a0ea984903
 ```
 Bucket Protocol ID
 ```
-0x160f163732ffff4bc10ee30fcc4c8c1a554f264880bf8575528ddf450c6229f9
+0xa7abebdd5042e01d5f4143ea279bb6b8752524c2b906d98e1d1a65a1a138d5bd
 ```
 Bucket Oracle ID
 ```
