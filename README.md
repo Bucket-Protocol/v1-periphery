@@ -16,9 +16,10 @@ Bucket Oracle ID
 ```
 
 ## Localnet
-Clone the repo and checkout to localnet branch
+Clone the repo and checkout to `localnet` branch
 ```
 git clone https://github.com/Bucket-Protocol/v1-periphery.git
+cd v1-periphery
 git checkout localnet
 ```
 Deploy all contracts including dependencies
