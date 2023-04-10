@@ -1,13 +1,7 @@
 # Bucket Periphery
 Entry functions for [frontend](https://bucketprotocol.io/)
 
-### Localnet
-```
-sui client publish --with-unpublished-dependencies --gas-budget 50000000000
-```
-and find the package ID and object IDs of BucketProtocol and BucketOracle
-
-### Testnet
+## Testnet
 Package ID
 ```
 0xd5aaeae9aa72f7f1690f76383ea2860f901b3bb527cb0b85e51ec9a0ea984903
@@ -20,3 +14,15 @@ Bucket Oracle ID
 ```
 0x5d552a9bd3162633c6990b8f8cbdc3a4280eec3687cdcb05984a977f0eccea90
 ```
+
+## Localnet
+Clone the repo and checkout to localnet branch
+```
+git clone https://github.com/Bucket-Protocol/v1-periphery.git
+git checkout localnet
+```
+Deploy all contracts including dependencies
+```
+sui client publish --with-unpublished-dependencies --gas-budget 50000000000
+```
+and find the package ID and object IDs of BucketProtocol and BucketOracle

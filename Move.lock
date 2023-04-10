@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "main", subdir = "framework" }
+source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "localnet", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -18,7 +18,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketOracle"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "main", subdir = "" }
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "localnet", subdir = "" }
 
 dependencies = [
   { name = "Sui" },
@@ -26,7 +26,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketProtocol"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "main", subdir = "protocol/" }
+source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "localnet", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
