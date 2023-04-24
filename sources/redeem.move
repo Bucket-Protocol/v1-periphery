@@ -43,6 +43,7 @@ module bucket_periphery::redeem {
         use sui::sui::SUI;
         use std::vector;
         use bucket_protocol::buck::BUCK;
+        use bucket_protocol::well;
         use std::debug;
         use bucket_periphery::borrow;
 
@@ -53,11 +54,11 @@ module bucket_periphery::redeem {
         let scenario_val = test_scenario::begin(dev);
         let scenario = &mut scenario_val;
 
-        let protocol = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
+        let (protocol, buck_wt, sui_wt) = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = oracle::new_for_testing<SUI>(1000, test_scenario::ctx(scenario));
 
-        let sui_input_amount = 1000000;
-        let buck_output_amount = 1200000;
+        let sui_input_amount = 1000000000000;
+        let buck_output_amount = 1200000000000;
         let buck_transfer_amount = buck_output_amount / 2;
 
         test_scenario::next_tx(scenario, borrower);
@@ -94,6 +95,9 @@ module bucket_periphery::redeem {
             test_utils::assert_eq(sui_value, buck_transfer_amount * 995 / 1000);
             test_scenario::return_to_sender(scenario, sui_coin);
         };
+
+        well::destroy_for_testing(buck_wt);
+        well::destroy_for_testing(sui_wt);
 
         test_scenario::end(scenario_val);
 

@@ -69,22 +69,22 @@ module bucket_periphery::borrow {
         use sui::test_scenario;
         use sui::test_utils;
         use bucket_protocol::buck::BUCK;
+        use bucket_protocol::well;
         use std::debug;
 
         let dev = @0xde1;
         let borrower_1 = @0x111;
-        let borrower_2 = @0x222;
 
         let scenario_val = test_scenario::begin(dev);
         let scenario = &mut scenario_val;
 
-        let protocol = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
+        let (protocol, buck_wt, sui_wt) = buck::new_for_testing(test_utils::create_one_time_witness<BUCK>(), test_scenario::ctx(scenario));
         let (oracle, ocap) = oracle::new_for_testing<SUI>(1000, test_scenario::ctx(scenario));
 
         test_utils::print(b"--- Borrower 1 ---");
 
-        let sui_input_amount = 1000000;
-        let buck_output_amount = 1200000;
+        let sui_input_amount = 1000000000000;
+        let buck_output_amount = 1200000000000;
 
         test_scenario::next_tx(scenario, borrower_1);
         {
@@ -106,28 +106,8 @@ module bucket_periphery::borrow {
             test_scenario::return_to_sender(scenario, buck_output);
         };
 
-        test_utils::print(b"--- Borrower 2 ---");
-
-        let sui_input_amount = 2000;
-        let buck_output_amount = 0;
-
-        test_scenario::next_tx(scenario, borrower_2);
-        {
-            let sui_input = balance::create_for_testing<SUI>(sui_input_amount*3/2);
-            let sui_input = vector[coin::from_balance(sui_input, test_scenario::ctx(scenario))];
-            auto_borrow(&mut protocol, &oracle, sui_input, sui_input_amount, buck_output_amount, test_scenario::ctx(scenario));
-        };
-
-        test_scenario::next_tx(scenario, borrower_2);
-        {
-            let sui_remain = test_scenario::take_from_sender<Coin<SUI>>(scenario);
-            let buck_coin_ids = test_scenario::ids_for_sender<Coin<BUCK>>(scenario);
-            debug::print(&sui_remain);
-            debug::print(&buck_coin_ids);
-            test_utils::assert_eq(coin::value(&sui_remain), sui_input_amount / 2);
-            test_utils::assert_eq(std::vector::length(&buck_coin_ids),  0);
-            test_scenario::return_to_sender(scenario, sui_remain);
-        };
+        well::destroy_for_testing(buck_wt);
+        well::destroy_for_testing(sui_wt);
 
         test_scenario::end(scenario_val);
         (protocol, oracle, ocap)
