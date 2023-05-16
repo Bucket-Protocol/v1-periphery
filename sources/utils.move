@@ -4,8 +4,6 @@ module bucket_periphery::utils {
     use sui::transfer;
     use sui::tx_context::TxContext;
 
-    const ENotEnoughToSplit: u64 = 0;
-
     public fun transfer_non_zero_coin<T>(coin: Coin<T>, recipient: address) {
         if (coin::value(&coin) == 0) {
             coin::destroy_zero(coin);
