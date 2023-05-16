@@ -2,22 +2,9 @@ module bucket_periphery::utils {
     use sui::coin::{Self, Coin};
     use sui::balance::{Self, Balance};
     use sui::transfer;
-    use sui::pay;
     use sui::tx_context::TxContext;
-    use std::vector;
 
     const ENotEnoughToSplit: u64 = 0;
-
-    public fun merge_and_split_into_balance<T>(
-        coins: vector<Coin<T>>,
-        out_amount: u64
-    ): (Coin<T>, Balance<T>) {
-        let coin = vector::pop_back(&mut coins);
-        pay::join_vec(&mut coin, coins);
-        assert!(coin::value(&coin) >= out_amount, ENotEnoughToSplit);
-        let out_balance = balance::split(coin::balance_mut(&mut coin), out_amount);
-        (coin, out_balance)
-    }
 
     public fun transfer_non_zero_coin<T>(coin: Coin<T>, recipient: address) {
         if (coin::value(&coin) == 0) {

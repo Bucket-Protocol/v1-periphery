@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "main", subdir = "framework" }
+source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "testnet", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -18,15 +18,17 @@ dependencies = [
 
 [[move.package]]
 name = "BucketOracle"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "main", subdir = "" }
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "" }
 
 dependencies = [
+  { name = "Pyth" },
   { name = "Sui" },
+  { name = "SwitchboardStdLib" },
 ]
 
 [[move.package]]
 name = "BucketProtocol"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "main", subdir = "protocol/" }
+source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "testnet", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
@@ -39,9 +41,35 @@ name = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
+name = "Pyth"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/pyth" }
+
+dependencies = [
+  { name = "Sui" },
+  { name = "Wormhole" },
+]
+
+[[move.package]]
 name = "Sui"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "testnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
+]
+
+[[move.package]]
+name = "SwitchboardStdLib"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/switchboard" }
+
+dependencies = [
+  { name = "MoveStdlib" },
+  { name = "Sui" },
+]
+
+[[move.package]]
+name = "Wormhole"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/pyth/wormhole" }
+
+dependencies = [
+  { name = "Sui" },
 ]
