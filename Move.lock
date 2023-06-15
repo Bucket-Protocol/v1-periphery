@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "testnet", subdir = "framework" }
+source = { git = "../v1-core", rev = "testnet", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -28,7 +28,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketProtocol"
-source = { git = "https://github.com/Bucket-Protocol/v1-core.git", rev = "testnet", subdir = "protocol/" }
+source = { git = "../v1-core", rev = "testnet", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
