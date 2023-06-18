@@ -4,15 +4,15 @@ Entry functions for [frontend](https://bucketprotocol.io/)
 ## Testnet
 Package ID
 ```
-0x73ca5d35ac23c5175db576930b2088e49b3af5b7ae86a32dd047ecc762e7c606
+0x895ca5b610850e5bd4c2b1e38736ed3c17769d5246b657a9fb957cfe53ce2346
 ```
-Bucket Protocol ID,  version `241720` and ID
+Bucket Protocol ID,  version `275`
 ```
-0x465547ecb5bf78f04fefe9ae1999de43bed5b01e3d5d095600fefbc956b8c599
+0x8b7ff1f21c8e80683a4504f8e564ad42e51361875ecce8c9ecc5596a67abd225
 ```
-Bucket Oracle ID,  version `37` and ID
+Bucket Oracle ID,  version `274`
 ```
-0xff459a65463a4ed60f722b1e188092ca51dc51149c90827df37392fe09105eef
+0xf6db6a423e8a2b7dea38f57c250a85235f286ffd9b242157eff7a4494dffc119
 ```
 
 ## Localnet
