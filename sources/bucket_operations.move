@@ -7,9 +7,6 @@ module bucket_periphery::bucket_operations {
     use sui::coin::{Self, Coin};
     use sui::clock::Clock;
 
-    use switchboard_std::aggregator::Aggregator;
-    // use bucket_oracle::bucket_oracle::{Self, BucketOracle};
-    // use bucket_oracle::single_oracle;
     use bucket_oracle::bucket_oracle::BucketOracle;
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
     use bucket_periphery::utils;
@@ -18,16 +15,11 @@ module bucket_periphery::bucket_operations {
         protocol: &mut BucketProtocol,
         oracle: &mut BucketOracle,
         clock: &Clock,
-        _switchboard_source: &Aggregator,
         collateral_coin: Coin<T>,
         buck_output_amount: u64,
         insertion_place: Option<address>,
         ctx: &mut TxContext,
     ) {
-        // TODO: no need to update on testnet
-        // let single_oracle = bucket_oracle::borrow_single_oracle_mut<T>(oracle);
-        // single_oracle::update_price_from_switchboard(single_oracle, clock, switchboard_source, ctx);
-
         let collateral_input = coin::into_balance(collateral_coin);
         let buck = buck::borrow<T>(
             protocol, oracle, clock, collateral_input, buck_output_amount, insertion_place, ctx
@@ -64,10 +56,6 @@ module bucket_periphery::bucket_operations {
         insertion_place: Option<address>,
         ctx: &mut TxContext,
     ) {
-        // TODO: no need to update on testnet
-        // let single_oracle = bucket_oracle::borrow_single_oracle_mut<T>(oracle);
-        // single_oracle::update_price_from_switchboard(single_oracle, clock, switchboard_source, ctx);
-
         let buck_input = coin::into_balance(buck_coin);
         let collateral_return = buck::redeem<T>(protocol, oracle, clock, buck_input, insertion_place);
         utils::transfer_non_zero_balance(collateral_return, tx_context::sender(ctx), ctx);
