@@ -4,7 +4,7 @@ Entry functions for [frontend](https://bucketprotocol.io/)
 ## Testnet
 Package ID
 ```
-0x895ca5b610850e5bd4c2b1e38736ed3c17769d5246b657a9fb957cfe53ce2346
+0xa7284cf261dfbabbf1d5fe59917bed6aec6b7a11f754f6871539eb0177000a7b
 ```
 Bucket Protocol ID,  version `275`
 ```
