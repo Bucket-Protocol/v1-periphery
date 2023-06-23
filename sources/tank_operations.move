@@ -28,7 +28,7 @@ module bucket_periphery::tank_operations {
         oracle: &BucketOracle,
         clock: &Clock,
         tokens: vector<ContributorToken<BUCK, T>>,
-        re_deposit_amount: u64,
+        withdrawal_amount: u64,
         ctx: &mut TxContext,
     ) {
         let user = tx_context::sender(ctx);
@@ -45,10 +45,13 @@ module bucket_periphery::tank_operations {
             token_len = token_len - 1;
         };
         vector::destroy_empty(tokens);
-        let deposit_input = balance::split(&mut buck_output, re_deposit_amount);
-        let tank = buck::borrow_tank_mut<T>(protocol);
-        let token = tank::deposit(tank, deposit_input, ctx);
-        transfer::public_transfer(token, user);
+        let re_deposit_amount = balance::value(&buck_output) - withdrawal_amount;
+        if (re_deposit_amount > 0) {
+            let deposit_input = balance::split(&mut buck_output, re_deposit_amount);
+            let tank = buck::borrow_tank_mut<T>(protocol);
+            let token = tank::deposit(tank, deposit_input, ctx);
+            transfer::public_transfer(token, user);
+        };
         utils::transfer_non_zero_balance(buck_output, user, ctx);
         utils::transfer_non_zero_balance(collateral_output, user, ctx);
         utils::transfer_non_zero_balance(bkt_output, user, ctx);
