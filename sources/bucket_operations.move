@@ -13,7 +13,7 @@ module bucket_periphery::bucket_operations {
 
     public entry fun borrow<T>(
         protocol: &mut BucketProtocol,
-        oracle: &mut BucketOracle,
+        oracle: &BucketOracle,
         clock: &Clock,
         collateral_coin: Coin<T>,
         buck_output_amount: u64,
