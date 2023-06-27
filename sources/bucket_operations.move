@@ -40,6 +40,19 @@ module bucket_periphery::bucket_operations {
     public entry fun repay<T>(
         protocol: &mut BucketProtocol,
         buck_coin: Coin<BUCK>,
+        insertion_place: Option<address>,
+        ctx: &mut TxContext,
+    ) {
+        let debtor = tx_context::sender(ctx);
+        let buck_input = coin::into_balance(buck_coin);
+        let collateral_return = buck::repay<T>(protocol, buck_input, ctx);
+
+        buck::top_up<T>(protocol, collateral_return, debtor, insertion_place);
+    }
+
+    public entry fun repay_and_withdraw<T>(
+        protocol: &mut BucketProtocol,
+        buck_coin: Coin<BUCK>,
         ctx: &mut TxContext,
     ) {
         let buck_input = coin::into_balance(buck_coin);
