@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "../v1-core", rev = "main", subdir = "framework" }
+source = { git = "../v1-core", rev = "mainnet", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -18,15 +18,17 @@ dependencies = [
 
 [[move.package]]
 name = "BucketOracle"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "test-only", subdir = "" }
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet", subdir = "" }
 
 dependencies = [
+  { name = "Pyth" },
   { name = "Sui" },
+  { name = "SwitchboardStdLib" },
 ]
 
 [[move.package]]
 name = "BucketProtocol"
-source = { git = "../v1-core", rev = "main", subdir = "protocol/" }
+source = { git = "../v1-core", rev = "mainnet", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
@@ -39,9 +41,35 @@ name = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
+name = "Pyth"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet", subdir = "partners/pyth" }
+
+dependencies = [
+  { name = "Sui" },
+  { name = "Wormhole" },
+]
+
+[[move.package]]
 name = "Sui"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
+]
+
+[[move.package]]
+name = "SwitchboardStdLib"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet", subdir = "partners/switchboard" }
+
+dependencies = [
+  { name = "MoveStdlib" },
+  { name = "Sui" },
+]
+
+[[move.package]]
+name = "Wormhole"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet", subdir = "partners/pyth/wormhole" }
+
+dependencies = [
+  { name = "Sui" },
 ]
