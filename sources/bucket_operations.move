@@ -82,7 +82,7 @@ module bucket_periphery::bucket_operations {
         utils::transfer_non_zero_balance(coll_withdrawal, debtor, ctx);
     }
 
-    public fun purely_repay<T>(
+    public entry fun purely_repay<T>(
         protocol: &mut BucketProtocol,
         buck_coin: Coin<BUCK>,
         ctx: &mut TxContext,
