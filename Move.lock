@@ -23,6 +23,7 @@ source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet
 dependencies = [
   { name = "Pyth" },
   { name = "Sui" },
+  { name = "SupraOracle" },
   { name = "SwitchboardStdLib" },
 ]
 
@@ -55,6 +56,14 @@ source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainn
 
 dependencies = [
   { name = "MoveStdlib" },
+]
+
+[[move.package]]
+name = "SupraOracle"
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet", subdir = "partners/supra" }
+
+dependencies = [
+  { name = "Sui" },
 ]
 
 [[move.package]]

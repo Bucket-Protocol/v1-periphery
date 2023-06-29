@@ -4,13 +4,17 @@ Entry functions for [frontend](https://bucketprotocol.io/)
 ## Mainnet
 Package ID
 ```
-0x8b6d673b7181cb74296e245b1d5f92d58fba3f5305f91df23a8aee4aa49f0deb
+0x5d6a89c4e933bf81aa8f0b3eeacf1464b35155e1fe5eca0fe9345b332ce98315
 ```
-BucketOracle ID, init_shared_version `5174500`
+Bucket Oracle ID, init_shared_version: `5174506`
 ```
-0xee06173381492cfee0155ad60dadf7246b5118f1aed138a3206a2275a3384f84
+0xf578d73f54b3068166d73c1a1edd5a105ce82f97f5a8ea1ac17d53e0132a1078
 ```
-BucketProtocol ID, init_shared_version `5174502`
+BucketProtocol ID, init_shared_version `6365975`
 ```
-0x8a2541b0de51563b68049af13e3d49de449ef7151dbd10b563ba08b5347bd5b4
+0x9e3dab13212b27f5434416939db5dec6a319d15b89a84fd074d03ece6350d3df
+```
+BktTreasury ID, init_shared_version `6365975`
+```
+0x7032c4d7afd30cd0dd04c924d63f1127de6fcc429968306807091d3ad3ff78b1
 ```
