@@ -82,6 +82,16 @@ module bucket_periphery::bucket_operations {
         utils::transfer_non_zero_balance(coll_withdrawal, debtor, ctx);
     }
 
+    public fun purely_repay<T>(
+        protocol: &mut BucketProtocol,
+        buck_coin: Coin<BUCK>,
+        ctx: &mut TxContext,
+    ) {
+        let buck_input = coin::into_balance(buck_coin);
+        let coll_output = buck::repay<T>(protocol, buck_input, ctx);
+        utils::transfer_non_zero_balance(coll_output, tx_context::sender(ctx), ctx);
+    }
+
     public entry fun redeem<T>(
         protocol: &mut BucketProtocol,
         oracle: &BucketOracle,
