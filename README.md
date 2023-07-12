@@ -4,7 +4,7 @@ Entry functions for [frontend](https://bucketprotocol.io/)
 ## Mainnet
 Package ID
 ```
-0x5d6a89c4e933bf81aa8f0b3eeacf1464b35155e1fe5eca0fe9345b332ce98315
+0xb71fc42c6b024290999aa4737fc51485557ee9089ce6151bc4384edb72869426
 ```
 Bucket Oracle ID, init_shared_version: `5174506`
 ```
