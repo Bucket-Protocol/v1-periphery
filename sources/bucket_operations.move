@@ -9,7 +9,10 @@ module bucket_periphery::bucket_operations {
     use sui::balance;
 
     use bucket_oracle::bucket_oracle::BucketOracle;
+    use bucket_framework::linked_table::{Self, LinkedTable};
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
+    use bucket_protocol::bucket;
+    use bucket_protocol::bottle;
     use bucket_periphery::utils;
 
     public entry fun borrow<T>(
@@ -22,6 +25,7 @@ module bucket_periphery::bucket_operations {
         ctx: &mut TxContext,
     ) {
         let collateral_input = coin::into_balance(collateral_coin);
+        let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         let buck = buck::borrow<T>(
             protocol, oracle, clock, collateral_input, buck_output_amount, insertion_place, ctx
         );
@@ -35,6 +39,7 @@ module bucket_periphery::bucket_operations {
         insertion_place: Option<address>,
     ) {
         let collateral_input = coin::into_balance(collateral_coin);
+        let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         buck::top_up<T>(protocol, collateral_input, for, insertion_place);
     }
 
@@ -51,6 +56,7 @@ module bucket_periphery::bucket_operations {
         let buck_input = coin::into_balance(buck_coin);
         let coll_output = buck::repay<T>(protocol, buck_input, ctx);
         let coll_output_amount = balance::value(&coll_output);
+        let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         if (coll_withdrawal_amount > coll_output_amount) {
             let extra_withdrawal_amount = coll_withdrawal_amount - coll_output_amount;
             let extra_coll_output = buck::withdraw<T>(protocol, oracle, clock, extra_withdrawal_amount, insertion_place, ctx);
@@ -85,6 +91,25 @@ module bucket_periphery::bucket_operations {
         let buck_input = coin::into_balance(buck_coin);
         let collateral_return = buck::redeem<T>(protocol, oracle, clock, buck_input, insertion_place);
         utils::transfer_non_zero_balance(collateral_return, tx_context::sender(ctx), ctx);
+    }
+
+    fun find_insertion_place<T>(
+        protocol: &BucketProtocol,
+        insertion_place: Option<address>,
+    ): Option<address> {
+        if (std::option::is_some(&insertion_place)) {
+            let debtor = std::option::destroy_some(insertion_place);
+            let bucket = buck::borrow_bucket<T>(protocol);
+            if (bucket::bottle_exists(bucket, debtor)) {
+                let bottle_table = bucket::borrow_bottle_table(bucket);
+                let table = bottle::borrow_table(bottle_table);
+                *linked_table::prev(table, debtor)
+            } else {
+                insertion_place
+            }
+        } else {
+            insertion_place
+        }
     }
 }
  
