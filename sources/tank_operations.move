@@ -8,7 +8,7 @@ module bucket_periphery::tank_operations {
     use sui::balance;
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
     use bucket_protocol::tank::{Self, ContributorToken};
-    use bucket_protocol::bkt::BKT;
+    use bucket_protocol::bkt::{BKT, BktTreasury};
     use bucket_oracle::bucket_oracle::BucketOracle;
     use bucket_periphery::utils;
 
@@ -27,6 +27,7 @@ module bucket_periphery::tank_operations {
         protocol: &mut BucketProtocol,
         oracle: &BucketOracle,
         clock: &Clock,
+        bkt_treasury: &mut BktTreasury,
         tokens: vector<ContributorToken<BUCK, T>>,
         withdrawal_amount: u64,
         ctx: &mut TxContext,
@@ -38,7 +39,7 @@ module bucket_periphery::tank_operations {
         let token_len = vector::length(&tokens);
         while (token_len > 0) {
             let token = vector::pop_back(&mut tokens);
-            let (buck_remain, collateral_reward, bkt_reward) = buck::tank_withdraw<T>(protocol, oracle, clock, token);
+            let (buck_remain, collateral_reward, bkt_reward) = buck::tank_withdraw<T>(protocol, oracle, clock, bkt_treasury, token, ctx);
             balance::join(&mut buck_output, buck_remain);
             balance::join(&mut collateral_output, collateral_reward);
             balance::join(&mut bkt_output, bkt_reward);
@@ -59,12 +60,13 @@ module bucket_periphery::tank_operations {
 
     public entry fun claim<T>(
         protocol: &mut BucketProtocol,
+        bkt_treasury: &mut BktTreasury,
         token: &mut ContributorToken<BUCK, T>,
         ctx: &mut TxContext,
     ) {
         let user = tx_context::sender(ctx);
         let tank = buck::borrow_tank_mut<T>(protocol);
-        let (collateral_reward, bkt_reward) = tank::claim(tank, token);
+        let (collateral_reward, bkt_reward) = tank::claim(tank, bkt_treasury, token, ctx);
         utils::transfer_non_zero_balance(collateral_reward, user, ctx);
         utils::transfer_non_zero_balance(bkt_reward, user, ctx);
     }

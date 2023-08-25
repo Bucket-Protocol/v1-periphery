@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "../v1-core", rev = "testnet", subdir = "framework" }
+source = { git = "../v1-core", rev = "main", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -18,77 +18,30 @@ dependencies = [
 
 [[move.package]]
 name = "BucketOracle"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "" }
+source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "test-only", subdir = "" }
 
 dependencies = [
-  { name = "Pyth" },
   { name = "Sui" },
-  { name = "SupraOracle" },
-  { name = "SwitchboardStdLib" },
-  { name = "TestnetCoins" },
 ]
 
 [[move.package]]
 name = "BucketProtocol"
-source = { git = "../v1-core", rev = "testnet", subdir = "protocol/" }
+source = { git = "../v1-core", rev = "main", subdir = "protocol/" }
 
 dependencies = [
   { name = "BucketFramework" },
   { name = "BucketOracle" },
   { name = "Sui" },
-  { name = "TestnetCoins" },
 ]
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
-
-[[move.package]]
-name = "Pyth"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/pyth" }
-
-dependencies = [
-  { name = "Sui" },
-  { name = "Wormhole" },
-]
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
-]
-
-[[move.package]]
-name = "SupraOracle"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/supra" }
-
-dependencies = [
-  { name = "Sui" },
-]
-
-[[move.package]]
-name = "SwitchboardStdLib"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/switchboard" }
-
-dependencies = [
-  { name = "MoveStdlib" },
-  { name = "Sui" },
-]
-
-[[move.package]]
-name = "TestnetCoins"
-source = { git = "https://github.com/Bucket-Protocol/testnet-coins.git", rev = "main", subdir = "" }
-
-dependencies = [
-  { name = "Sui" },
-]
-
-[[move.package]]
-name = "Wormhole"
-source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "testnet", subdir = "partners/pyth/wormhole" }
-
-dependencies = [
-  { name = "Sui" },
 ]
