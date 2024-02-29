@@ -1,7 +1,7 @@
 [package]
 name = "BucketPeriphery"
 version = "0.0.1"
-published-at = "0xb59c19de88addb7b3e721066c6c99987d09ad22fa829c69dbf0f0c1c0be20625"
+published-at = "0x62e2aa7b8575e29d0fab1cc3116b4d6cf372017f3e5c65cc444371f46718a357"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }

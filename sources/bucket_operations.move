@@ -15,7 +15,7 @@ module bucket_periphery::bucket_operations {
     use bucket_protocol::bottle;
     use bucket_periphery::utils;
 
-    public entry fun borrow<T>(
+    public fun borrow<T>(
         protocol: &mut BucketProtocol,
         oracle: &BucketOracle,
         clock: &Clock,
@@ -32,18 +32,19 @@ module bucket_periphery::bucket_operations {
         utils::transfer_non_zero_balance(buck, tx_context::sender(ctx), ctx);
     }
 
-    public entry fun top_up<T>(
+    public fun top_up<T>(
         protocol: &mut BucketProtocol,
         collateral_coin: Coin<T>,
         for: address,
         insertion_place: Option<address>,
+        clock: &Clock,
     ) {
         let collateral_input = coin::into_balance(collateral_coin);
         let insertion_place = find_insertion_place<T>(protocol, insertion_place);
-        buck::top_up<T>(protocol, collateral_input, for, insertion_place);
+        buck::top_up_coll<T>(protocol, collateral_input, for, insertion_place, clock);
     }
 
-    public entry fun repay_and_withdraw<T>(
+    public fun repay_and_withdraw<T>(
         protocol: &mut BucketProtocol,
         oracle: &BucketOracle,
         clock: &Clock,
@@ -53,8 +54,17 @@ module bucket_periphery::bucket_operations {
         ctx: &mut TxContext,
     ) {
         let debtor = tx_context::sender(ctx);
+        let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, debtor, clock);
+        let buck_value = coin::value(&buck_coin);
         let buck_input = coin::into_balance(buck_coin);
-        let coll_output = buck::repay<T>(protocol, buck_input, ctx);
+        let buck_real_input = if (buck_value > debt_amount) {
+            let buck_real_input = balance::split(&mut buck_input, debt_amount);
+            utils::transfer_non_zero_balance(buck_input, debtor, ctx);
+            buck_real_input
+        } else {
+            buck_input
+        };
+        let coll_output = buck::repay_debt<T>(protocol, buck_real_input, clock, ctx);
         let coll_output_amount = balance::value(&coll_output);
         let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         if (coll_withdrawal_amount > coll_output_amount) {
@@ -64,7 +74,7 @@ module bucket_periphery::bucket_operations {
         } else if (coll_withdrawal_amount < coll_output_amount) {
             let topup_amount = coll_output_amount - coll_withdrawal_amount;
             let topup_coll_input = balance::split(&mut coll_output, topup_amount);
-            buck::top_up(protocol, topup_coll_input, debtor, insertion_place);
+            buck::top_up_coll(protocol, topup_coll_input, debtor, insertion_place, clock);
         };
         
         utils::transfer_non_zero_balance(coll_output, debtor, ctx);
@@ -73,10 +83,11 @@ module bucket_periphery::bucket_operations {
     public entry fun repay<T>(
         protocol: &mut BucketProtocol,
         buck_coin: Coin<BUCK>,
+        clock: &Clock,
         ctx: &mut TxContext,
     ) {
         let buck_input = coin::into_balance(buck_coin);
-        let coll_output = buck::repay<T>(protocol, buck_input, ctx);
+        let coll_output = buck::repay_debt<T>(protocol, buck_input, clock, ctx);
         utils::transfer_non_zero_balance(coll_output, tx_context::sender(ctx), ctx);
     }
 
