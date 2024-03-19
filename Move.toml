@@ -1,13 +1,13 @@
 [package]
 name = "BucketPeriphery"
 version = "0.0.1"
-published-at = "0x378137469c4833d73cd352a49bdcc94bf59ef645ff4d5cf8efdee7054d0ea296"
+published-at = "0x6888bf552ebbaf36e371928bb20b65c1b3fd693e3e1b87cef978bd44a03107d5"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
 BucketProtocol = { local = "../v1-core/protocol" }
 
 [addresses]
-bucket_periphery = "0x378137469c4833d73cd352a49bdcc94bf59ef645ff4d5cf8efdee7054d0ea296"
+bucket_periphery = "0x6888bf552ebbaf36e371928bb20b65c1b3fd693e3e1b87cef978bd44a03107d5"
 # bucket_periphery = "0x0"
 sui = "0000000000000000000000000000000000000000000000000000000000000002"
