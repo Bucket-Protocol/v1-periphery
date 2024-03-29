@@ -217,5 +217,13 @@ module bucket_periphery::bucket_operations {
         };
         adjusted_amount
     }
+
+    public fun destroy_empty_strap<T>(
+        protocol: &BucketProtocol,
+        strap: BottleStrap<T>,
+    ) {
+        let bucket = buck::borrow_bucket<T>(protocol);
+        bucket::destroy_empty_strap(bucket, strap);
+    }
 }
  
