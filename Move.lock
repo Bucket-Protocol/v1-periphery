@@ -2,7 +2,7 @@
 
 [move]
 version = 0
-manifest_digest = "541E9B8474AC119B092C3378FEB42244013F3C35756BE62A742E88D23D015913"
+manifest_digest = "BB85F9D629CE8E80E3EFE85BF0CC1A1F1FDA9A558B37C6CF3D1787F92ED55ED5"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 
 dependencies = [
@@ -36,6 +36,15 @@ source = { local = "../v1-core/protocol" }
 dependencies = [
   { name = "BucketFramework" },
   { name = "BucketOracle" },
+  { name = "Flask" },
+  { name = "Sui" },
+]
+
+[[move.package]]
+name = "Flask"
+source = { local = "../v1-core/flask" }
+
+dependencies = [
   { name = "Sui" },
 ]
 
