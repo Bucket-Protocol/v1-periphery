@@ -2,7 +2,7 @@
 
 [move]
 version = 0
-manifest_digest = "BB85F9D629CE8E80E3EFE85BF0CC1A1F1FDA9A558B37C6CF3D1787F92ED55ED5"
+manifest_digest = "9C69B5EB889C0C28F5FF7FC8151B701EC76382FC021C4046024F44C6D24965C6"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 
 dependencies = [
@@ -93,3 +93,16 @@ source = { git = "https://github.com/Bucket-Protocol/oracle.git", rev = "mainnet
 dependencies = [
   { name = "Sui" },
 ]
+
+[move.toolchain-version]
+compiler-version = "1.27.0"
+edition = "legacy"
+flavor = "sui"
+
+[env]
+
+[env.mainnet]
+chain-id = "35834a8a"
+original-published-id = "0x7ab476554540ffb07829ccabc921f125da16e25d5b0d0910a9a5c0030443e436"
+latest-published-id = "0x7ab476554540ffb07829ccabc921f125da16e25d5b0d0910a9a5c0030443e436"
+published-version = "1"

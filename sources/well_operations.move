@@ -7,7 +7,7 @@ module bucket_periphery::well_operations {
     use bucket_protocol::bkt::BKT;
     use bucket_protocol::well::{Self, StakedBKT};
     use bucket_protocol::buck::{Self, BucketProtocol};
-    use bucket_protocol::bkt::BktTreasury;
+    use bucket_protocol::bkt::{BktTreasury, BktAdminCap};
     use bucket_periphery::utils;
 
     public entry fun stake<T>(
@@ -58,5 +58,37 @@ module bucket_periphery::well_operations {
         let well = buck::borrow_well_mut<T>(protocol);
         let reward = well::claim<T>(well, st_bkt);
         transfer::public_transfer(coin::from_balance(reward, ctx), tx_context::sender(ctx));
+    }
+
+    public entry fun deposit_fee<T>(
+        protocol: &mut BucketProtocol,
+        coin: Coin<T>,
+    ) {
+        let well = buck::borrow_well_mut<T>(protocol);
+        well::collect_fee(well, coin::into_balance(coin));
+    }
+
+    public fun withdraw_reserve<T>(
+        bkt_cap: &BktAdminCap,
+        protocol: &mut BucketProtocol,
+        ctx: &mut TxContext,
+    ): Coin<T> {
+        let well = buck::borrow_well_mut<T>(protocol);
+        let withdrawal = well::withdraw_reserve(bkt_cap, well);
+        coin::from_balance(withdrawal, ctx)
+    }
+
+    public fun withdraw_reserve_to<T>(
+        bkt_cap: &BktAdminCap,
+        protocol: &mut BucketProtocol,
+        recipient: address,
+        ctx: &mut TxContext,
+    ) {
+        let reserve = withdraw_reserve<T>(bkt_cap, protocol, ctx);
+        if (coin::value(&reserve) > 0) {
+            transfer::public_transfer(reserve, recipient);
+        } else {
+            coin::destroy_zero(reserve);
+        };
     }
 }
