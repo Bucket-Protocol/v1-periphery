@@ -18,3 +18,9 @@ BktTreasury ID, init_shared_version `6365975`
 ```
 0x7032c4d7afd30cd0dd04c924d63f1127de6fcc429968306807091d3ad3ff78b1
 ```
+
+## Cap
+UpgradeCap
+```
+0xd43a3e5ea970447101b049db62cb18d5c5e98fe74b5c1de303df13c584d13b88
+```
