@@ -5,6 +5,7 @@ module bucket_periphery::bucket_operations {
     use std::option::{Self, Option};
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Self, Coin};
+    use sui::balance::{Balance};
     use sui::clock::Clock;
     use sui::balance;
 
@@ -224,6 +225,60 @@ module bucket_periphery::bucket_operations {
     ) {
         let bucket = buck::borrow_bucket<T>(protocol);
         bucket::destroy_empty_strap(bucket, strap);
+    }
+
+    public fun high_borrow<T>(
+        protocol: &mut BucketProtocol,
+        oracle: &BucketOracle,
+        clock: &Clock,
+        collateral: Balance<T>,
+        buck_output_amount: u64,
+        insertion_place: Option<address>,
+        ctx: &mut TxContext,
+    ): Balance<BUCK> {
+        if (option::is_none(&insertion_place))
+            insertion_place = last_debtor<T>(protocol);
+        buck::borrow<T>(
+            protocol, oracle, clock, collateral, buck_output_amount, insertion_place, ctx,
+        )
+    }
+
+    public fun high_borrow_with_strap<T>(
+        protocol: &mut BucketProtocol,
+        oracle: &BucketOracle,
+        strap: &BottleStrap<T>,
+        clock: &Clock,
+        collateral: Balance<T>,
+        buck_output_amount: u64,
+        insertion_place: Option<address>,
+        ctx: &mut TxContext,
+    ): Balance<BUCK> {
+        if (option::is_none(&insertion_place))
+            insertion_place = last_debtor<T>(protocol);
+        buck::borrow_with_strap<T>(
+            protocol, oracle, strap, clock, collateral, buck_output_amount, insertion_place, ctx,
+        )
+    }
+
+    public fun high_top_up<T>(
+        protocol: &mut BucketProtocol,
+        collateral: Balance<T>,
+        for: address,
+        insertion_place: Option<address>,
+        clock: &Clock,
+    ) {
+        if (option::is_none(&insertion_place))
+            insertion_place = last_debtor<T>(protocol);
+        buck::top_up_coll(protocol, collateral, for, insertion_place, clock)
+    }
+
+    public fun last_debtor<T>(
+        protocol: &BucketProtocol,
+    ): Option<address> {
+        let bucket = buck::borrow_bucket<T>(protocol);
+        let bottle_table = bucket::borrow_bottle_table(bucket);
+        let table = bottle::borrow_table(bottle_table);
+        *linked_table::back(table)
     }
 }
  

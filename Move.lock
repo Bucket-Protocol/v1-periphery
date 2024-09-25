@@ -2,7 +2,7 @@
 
 [move]
 version = 0
-manifest_digest = "50A0B480D3A6F2B207FB559A53EA9BDBB2D35CA9F5203E2F74544E5230F7CAE4"
+manifest_digest = "2BA3F2518EF88A283FB12E54466732B6DD31891769E5A01110E2DA1C57D971C9"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 
 dependencies = [
@@ -12,7 +12,7 @@ dependencies = [
 
 [[move.package]]
 name = "BucketFramework"
-source = { git = "../v1-core", rev = "mainnet", subdir = "framework" }
+source = { git = "..", rev = "mainnet", subdir = "framework" }
 
 dependencies = [
   { name = "Sui" },
@@ -42,7 +42,7 @@ dependencies = [
 
 [[move.package]]
 name = "Flask"
-source = { git = "../v1-core", rev = "mainnet", subdir = "flask" }
+source = { git = "..", rev = "mainnet", subdir = "flask" }
 
 dependencies = [
   { name = "Sui" },
@@ -95,7 +95,7 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.30.3"
+compiler-version = "1.33.1"
 edition = "legacy"
 flavor = "sui"
 
@@ -104,5 +104,5 @@ flavor = "sui"
 [env.mainnet]
 chain-id = "35834a8a"
 original-published-id = "0xb3f10f2c9a52b615ab8b0b930ee55e019bacb407b29f5f534e6d9c3291341db8"
-latest-published-id = "0x865ab51aceb2decefa4bf3658e26a22f046b6059700b0223eb43d31d8ba05edc"
-published-version = "2"
+latest-published-id = "0xa1f1e93a392f011c69175d9064f5c4cb45ecd46468c1c9f537d3efa1d021cb95"
+published-version = "3"
