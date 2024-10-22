@@ -9,6 +9,8 @@ module bucket_periphery::utils {
     use sui::clock::Clock;
     use bucket_protocol::buck::{Self, BucketProtocol};
     use bucket_protocol::bucket;
+    use bucket_protocol::bottle;
+    use bucket_framework::linked_table;
 
     public fun transfer_non_zero_coin<T>(coin: Coin<T>, recipient: address) {
         if (coin::value(&coin) == 0) {
@@ -139,23 +141,62 @@ module bucket_periphery::utils {
             cursor = bucket::get_lowest_cr_debtor(bucket);
         };
         let total_counter = 0;
-        let step_counter = 0;
         while (
             option::is_some(&cursor) && total_counter < limit
         ) {
             let debtor = *option::borrow(&cursor);
             cursor = *bucket::next_debtor(bucket, debtor);
-            if (step_counter == step_size) {
+            if (total_counter % step_size == 0) {
                 let (coll_amount, debt_amount) = bucket::get_bottle_info_with_interest_by_debtor(
                     bucket, debtor, clock,
                 );
                 vec::push_back(&mut bottle_vec, BottleData {
                     debtor, coll_amount, debt_amount,
                 });
-                step_counter = 0;
             };
             total_counter = total_counter + 1;
-            step_counter = step_counter + 1;
+        };
+        (bottle_vec, cursor)
+    }
+
+    public fun get_bottles_with_direction<T>(
+        protocol: &BucketProtocol,
+        clock: &Clock,
+        cursor: Option<address>,
+        step_size: u64,
+        limit: u64,
+        upward: bool,
+    ): (vector<BottleData>, Option<address>)  {
+        let bottle_vec = vector<BottleData>[];
+        let bucket = buck::borrow_bucket<T>(protocol);
+        if (option::is_none(&cursor)) {
+            cursor = if (upward) {
+                bucket::get_lowest_cr_debtor(bucket)
+            } else {
+                let bottle_table = bucket::borrow_bottle_table(bucket);
+                let table = bottle::borrow_table(bottle_table);
+                *linked_table::back(table)
+            };
+        };
+        let total_counter = 0;
+        while (
+            option::is_some(&cursor) && total_counter < limit
+        ) {
+            let debtor = *option::borrow(&cursor);
+            cursor = if (upward) {
+                *bucket::next_debtor(bucket, debtor)
+            } else {
+                *bucket::prev_debtor(bucket, debtor)
+            };
+            if (total_counter % step_size == 0) {
+                let (coll_amount, debt_amount) = bucket::get_bottle_info_with_interest_by_debtor(
+                    bucket, debtor, clock,
+                );
+                vec::push_back(&mut bottle_vec, BottleData {
+                    debtor, coll_amount, debt_amount,
+                });
+            };
+            total_counter = total_counter + 1;
         };
         (bottle_vec, cursor)
     }
