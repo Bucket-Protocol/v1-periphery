@@ -188,7 +188,7 @@ module bucket_periphery::utils {
             } else {
                 *bucket::prev_debtor(bucket, debtor)
             };
-            if (total_counter % step_size == 0) {
+            if (total_counter % step_size == 0 || option::is_none(&cursor)) {
                 let (coll_amount, debt_amount) = bucket::get_bottle_info_with_interest_by_debtor(
                     bucket, debtor, clock,
                 );
