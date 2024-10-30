@@ -1,4 +1,6 @@
 module bucket_periphery::well_operations {
+
+    use std::ascii::{String};
     use sui::coin::{Self, Coin};
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
@@ -66,6 +68,15 @@ module bucket_periphery::well_operations {
     ) {
         let well = buck::borrow_well_mut<T>(protocol);
         well::collect_fee(well, coin::into_balance(coin));
+    }
+
+    public fun deposit_fee_from<T>(
+        protocol: &mut BucketProtocol,
+        coin: Coin<T>,
+        from: String,
+    ) {
+        let well = buck::borrow_well_mut<T>(protocol);
+        well::collect_fee_from(well, coin::into_balance(coin), from);
     }
 
     public fun withdraw_reserve<T>(
