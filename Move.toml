@@ -1,12 +1,15 @@
 [package]
 name = "BucketPeriphery"
 version = "0.6.0"
-edition = "legacy"
-published-at = "0xb49077a2ec07a63a10d96d7b2be2641ca69807be61f55997d9b38a00dd865d25"
+edition = "2024.beta"
+# published-at = "0x7b8925d9da803f3390b3f696a32df92b512ce96147d681251f47cd16bebf914a"
+published-at = "0x2e641a878f41e34c384f52e81d76e2466349b4a436fee48a3425d45c81969537"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
 BucketProtocol = { git = "../v1-core", subdir = "protocol/", rev = "mainnet" }
+StrapFountain = { git = "../strap-fountain", rev = "mainnet" }
+# BucketPointPhase1 = { git = "../../liquidlink/bucket-point-phase-1/", rev = "mainnet" }
 
 [addresses]
 bucket_periphery = "0x0"

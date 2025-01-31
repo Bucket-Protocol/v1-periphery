@@ -2,8 +2,6 @@ module bucket_periphery::well_operations {
 
     use std::ascii::{String};
     use sui::coin::{Self, Coin};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
     use sui::clock::Clock;
 
     use bucket_protocol::bkt::BKT;

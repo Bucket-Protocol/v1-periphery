@@ -2,8 +2,6 @@ module bucket_periphery::bucket_operations {
 
     // Dependecies
 
-    use std::option::{Self, Option};
-    use sui::tx_context::{Self, TxContext};
     use sui::coin::{Self, Coin};
     use sui::balance::{Balance};
     use sui::clock::Clock;
@@ -37,13 +35,13 @@ module bucket_periphery::bucket_operations {
     public fun top_up<T>(
         protocol: &mut BucketProtocol,
         collateral_coin: Coin<T>,
-        for: address,
+        debtor: address,
         insertion_place: Option<address>,
         clock: &Clock,
     ) {
         let collateral_input = coin::into_balance(collateral_coin);
         let insertion_place = find_insertion_place<T>(protocol, insertion_place);
-        buck::top_up_coll<T>(protocol, collateral_input, for, insertion_place, clock);
+        buck::top_up_coll<T>(protocol, collateral_input, debtor, insertion_place, clock);
     }
 
     public fun repay_and_withdraw<T>(
@@ -58,7 +56,7 @@ module bucket_periphery::bucket_operations {
         let debtor = tx_context::sender(ctx);
         let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, debtor, clock);
         let buck_value = coin::value(&buck_coin);
-        let buck_input = coin::into_balance(buck_coin);
+        let mut buck_input = coin::into_balance(buck_coin);
         let buck_real_input = if (buck_value > debt_amount) {
             let buck_real_input = balance::split(&mut buck_input, debt_amount);
             utils::transfer_non_zero_balance(buck_input, debtor, ctx);
@@ -66,7 +64,7 @@ module bucket_periphery::bucket_operations {
         } else {
             buck_input
         };
-        let coll_output = buck::repay_debt<T>(protocol, buck_real_input, clock, ctx);
+        let mut coll_output = buck::repay_debt<T>(protocol, buck_real_input, clock, ctx);
         let coll_output_amount = balance::value(&coll_output);
         let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         if (coll_withdrawal_amount > coll_output_amount) {
@@ -96,7 +94,7 @@ module bucket_periphery::bucket_operations {
         let debtor = tx_context::sender(ctx);
         let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, strap_addr, clock);
         let buck_value = coin::value(&buck_coin);
-        let buck_input = coin::into_balance(buck_coin);
+        let mut buck_input = coin::into_balance(buck_coin);
         let buck_real_input = if (buck_value > debt_amount) {
             let buck_real_input = balance::split(&mut buck_input, debt_amount);
             utils::transfer_non_zero_balance(buck_input, debtor, ctx);
@@ -104,7 +102,7 @@ module bucket_periphery::bucket_operations {
         } else {
             buck_input
         };
-        let coll_output = buck::repay_with_strap<T>(protocol, strap, buck_real_input, clock);
+        let mut coll_output = buck::repay_with_strap<T>(protocol, strap, buck_real_input, clock);
         let coll_output_amount = balance::value(&coll_output);
         let insertion_place = find_insertion_place<T>(protocol, insertion_place);
         if (coll_withdrawal_amount > coll_output_amount) {
@@ -128,7 +126,7 @@ module bucket_periphery::bucket_operations {
     ) {
         let debtor = tx_context::sender(ctx);
         let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, debtor, clock);
-        let buck_balance = coin::into_balance(buck_coin);
+        let mut buck_balance = coin::into_balance(buck_coin);
         let buck_input = balance::split(&mut buck_balance, debt_amount);
         let coll_output = buck::repay_debt<T>(protocol, buck_input, clock, ctx);
         utils::transfer_non_zero_balance(coll_output, debtor, ctx);
@@ -145,7 +143,7 @@ module bucket_periphery::bucket_operations {
         let debtor = tx_context::sender(ctx);
         let strap_addr = strap::get_address(&strap);
         let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, strap_addr, clock);
-        let buck_balance = coin::into_balance(buck_coin);
+        let mut buck_balance = coin::into_balance(buck_coin);
         let buck_input = balance::split(&mut buck_balance, debt_amount);
         let coll_output = buck::repay_with_strap<T>(protocol, &strap, buck_input, clock);
         utils::transfer_non_zero_balance(coll_output, debtor, ctx);
@@ -162,7 +160,7 @@ module bucket_periphery::bucket_operations {
         insertion_place: Option<address>,
         ctx: &mut TxContext,
     ) {
-        let buck_balance = coin::into_balance(buck_coin);
+        let mut buck_balance = coin::into_balance(buck_coin);
         let buck_value = balance::value(&buck_balance);
         let redemption_amount = redemption_amount<T>(protocol, clock, buck_value);
         let buck_input = balance::split(&mut buck_balance, redemption_amount);
@@ -193,15 +191,15 @@ module bucket_periphery::bucket_operations {
     public fun redemption_amount<T>(
         protocol: &mut BucketProtocol,
         clock: &Clock,
-        input_amount: u64,
+        mut input_amount: u64,
     ): u64 {
         let bucket = buck::borrow_bucket<T>(protocol);
         let bottle_table = bucket::borrow_bottle_table(bucket);
         let table = bottle::borrow_table(bottle_table);
         let bucket_size = linked_table::length(table);
         if (bucket_size <= 500) return input_amount;
-        let adjusted_amount = 0;
-        let debtor_opt = *linked_table::front(table);
+        let mut adjusted_amount = 0;
+        let mut debtor_opt = *linked_table::front(table);
         while (option::is_some(&debtor_opt)) {
             let debtor = option::destroy_some(debtor_opt);
             let (_, debt_amount) = bucket::get_bottle_info_with_interest_by_debtor(
@@ -233,7 +231,7 @@ module bucket_periphery::bucket_operations {
         clock: &Clock,
         collateral: Balance<T>,
         buck_output_amount: u64,
-        insertion_place: Option<address>,
+        mut insertion_place: Option<address>,
         ctx: &mut TxContext,
     ): Balance<BUCK> {
         if (option::is_none(&insertion_place))
@@ -250,7 +248,7 @@ module bucket_periphery::bucket_operations {
         clock: &Clock,
         collateral: Balance<T>,
         buck_output_amount: u64,
-        insertion_place: Option<address>,
+        mut insertion_place: Option<address>,
         ctx: &mut TxContext,
     ): Balance<BUCK> {
         if (option::is_none(&insertion_place))
@@ -263,13 +261,13 @@ module bucket_periphery::bucket_operations {
     public fun high_top_up<T>(
         protocol: &mut BucketProtocol,
         collateral: Balance<T>,
-        for: address,
-        insertion_place: Option<address>,
+        debtor: address,
+        mut insertion_place: Option<address>,
         clock: &Clock,
     ) {
         if (option::is_none(&insertion_place))
             insertion_place = last_debtor<T>(protocol);
-        buck::top_up_coll(protocol, collateral, for, insertion_place, clock)
+        buck::top_up_coll(protocol, collateral, debtor, insertion_place, clock)
     }
 
     public fun last_debtor<T>(

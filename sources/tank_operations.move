@@ -1,11 +1,8 @@
 module bucket_periphery::tank_operations {
 
     use std::vector as vec;
-    use std::option;
     use sui::clock::Clock;
     use sui::coin::{Self, Coin};
-    use sui::tx_context::{Self, TxContext};
-    use sui::transfer;
     use sui::balance;
     use bucket_protocol::buck::{Self, BUCK, BucketProtocol};
     use bucket_protocol::bucket;
@@ -30,15 +27,15 @@ module bucket_periphery::tank_operations {
         oracle: &BucketOracle,
         clock: &Clock,
         bkt_treasury: &mut BktTreasury,
-        tokens: vector<ContributorToken<BUCK, T>>,
+        mut tokens: vector<ContributorToken<BUCK, T>>,
         withdrawal_amount: u64,
         ctx: &mut TxContext,
     ) {
         let user = tx_context::sender(ctx);
-        let buck_output = balance::zero<BUCK>();
-        let collateral_output = balance::zero<T>();
-        let bkt_output = balance::zero<BKT>();
-        let token_len = vec::length(&tokens);
+        let mut buck_output = balance::zero<BUCK>();
+        let mut collateral_output = balance::zero<T>();
+        let mut bkt_output = balance::zero<BKT>();
+        let mut token_len = vec::length(&tokens);
         while (token_len > 0) {
             let token = vec::pop_back(&mut tokens);
             let (buck_remain, collateral_reward, bkt_reward) = buck::tank_withdraw<T>(protocol, oracle, clock, bkt_treasury, token, ctx);
@@ -82,7 +79,7 @@ module bucket_periphery::tank_operations {
         page_size: u64,
         ctx: &mut TxContext,
     ) {
-        let (needed_amount, debtors) = get_amount_needed_to_liquidate<T>(
+        let (needed_amount, mut debtors) = get_amount_needed_to_liquidate<T>(
             protocol, oracle, clock, page_size,
         );
         let bucket = buck::borrow_bucket<T>(protocol);
@@ -92,7 +89,7 @@ module bucket_periphery::tank_operations {
         if (needed_amount == 0) return;
         let buck_in = balance::split(buck_mut, needed_amount);
         let token = tank::deposit(tank, buck_in, ctx);
-        let total_rebate = balance::zero<T>();
+        let mut total_rebate = balance::zero<T>();
         while (!vec::is_empty(&debtors)) {
             let debtor = vec::pop_back(&mut debtors);
             let rebate = if (is_in_recovery_mode) {
@@ -102,7 +99,7 @@ module bucket_periphery::tank_operations {
             };
             balance::join(&mut total_rebate, rebate);
         };
-        let (buck_out, coll_out, bkt_out) = buck::tank_withdraw<T>(
+        let (buck_out, mut coll_out, bkt_out) = buck::tank_withdraw<T>(
             protocol,
             oracle,
             clock,
@@ -131,10 +128,10 @@ module bucket_periphery::tank_operations {
         page_size: u64,
     ): (u64, vector<address>) {
         let bucket = buck::borrow_bucket<T>(protocol);
-        let cursor = bucket::get_lowest_cr_debtor(bucket);
-        let unhealthy_debtors = vector<address>[];
-        let counter = 0;
-        let needed_amount = 0;
+        let mut cursor = bucket::get_lowest_cr_debtor(bucket);
+        let mut unhealthy_debtors = vector<address>[];
+        let mut counter = 0;
+        let mut needed_amount = 0;
         while (option::is_some(&cursor) && counter < page_size) {
             let debtor = *option::borrow(&cursor);
             if (bucket::is_healthy_bottle_by_debtor(
