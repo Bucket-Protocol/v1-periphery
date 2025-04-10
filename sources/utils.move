@@ -4,10 +4,12 @@ use bucket_framework::linked_table;
 use bucket_protocol::bottle;
 use bucket_protocol::buck::{Self, BucketProtocol};
 use bucket_protocol::bucket;
+use bucket_protocol::strap::{BottleStrap};
 use std::vector as vec;
 use sui::balance::{Self, Balance};
 use sui::clock::Clock;
 use sui::coin::{Self, Coin};
+use strap_fountain::fountain::{StakeProof};
 
 public fun transfer_non_zero_coin<T>(coin: Coin<T>, recipient: address) {
     if (coin::value(&coin) == 0) {
@@ -223,4 +225,55 @@ public fun get_bottles_with_direction<T>(
         total_counter = total_counter + 1;
     };
     (bottle_vec, cursor)
+}
+
+public fun try_get_bottle_by_account<T>(
+    protocol: &BucketProtocol,
+    clock: &Clock,
+    debtor: address,
+): Option<BottleData> {
+    let bucket = protocol.borrow_bucket<T>();
+    if (bucket.bottle_exists(debtor)) {
+        let (coll_amount, debt_amount) = bucket.get_bottle_info_with_interest_by_debtor<T>(debtor, clock);
+        option::some(BottleData { debtor, coll_amount, debt_amount })
+    } else {
+        if (bucket.borrow_surplus_bottle_table().contains(debtor)) {
+            let (coll_amount, debt_amount) = bucket.get_surplus_bottle_info_by_debtor(debtor);
+            option::some(BottleData { debtor, coll_amount, debt_amount })
+        } else {
+            option::none()
+        }
+    }
+}
+
+public fun try_get_bottle_by_strap<T>(
+    protocol: &BucketProtocol,
+    clock: &Clock,
+    strap: &BottleStrap<T>,
+): Option<BottleData> {
+    let account = strap.get_address();
+    let bottle_opt = try_get_bottle_by_account<T>(protocol, clock, account);
+    bottle_opt.or!(
+        option::some(BottleData {
+            debtor: account,
+            coll_amount: 0,
+            debt_amount: 0,
+        })
+    )
+}
+
+public fun try_get_bottle_by_proof<T, R>(
+    protocol: &BucketProtocol,
+    clock: &Clock,
+    proof: &StakeProof<T, R>,
+): Option<BottleData> {
+    let account = proof.strap_address();
+    let bottle_opt = try_get_bottle_by_account<T>(protocol, clock, account);
+    bottle_opt.or!(
+        option::some(BottleData {
+            debtor: account,
+            coll_amount: 0,
+            debt_amount: 0,
+        })
+    )
 }

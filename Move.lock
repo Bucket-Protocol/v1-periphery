@@ -2,13 +2,27 @@
 
 [move]
 version = 3
-manifest_digest = "5EB6DEBAF1E9776513A122BD16F7F99BDF978D7E4B554A7D18EDF2E956B022B4"
-deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+manifest_digest = "50A7BBD0103DAA94CB4DBA0632CA0827EA1CE88C8C34400A7D260DAC6E5ECF67"
+deps_digest = "CAFAD8A7CF51067FB4358215BECB86BD100DD64E57C2AC8A7AE7D74B688F5965"
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
   { id = "BucketProtocol", name = "BucketProtocol" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "StrapFountain", name = "StrapFountain" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "Bridge"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/bridge" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -35,9 +49,22 @@ id = "BucketProtocol"
 source = { git = "../v1-core", rev = "mainnet", subdir = "protocol/" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
   { id = "BucketFramework", name = "BucketFramework" },
   { id = "BucketOracle", name = "BucketOracle" },
+  { id = "DeepBook", name = "DeepBook" },
   { id = "Flask", name = "Flask" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "DeepBook"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/deepbook" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
 ]
 
@@ -51,7 +78,7 @@ dependencies = [
 
 [[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "Pyth"
@@ -67,16 +94,29 @@ id = "StrapFountain"
 source = { git = "../strap-fountain", rev = "mainnet", subdir = "" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
   { id = "BucketProtocol", name = "BucketProtocol" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
+]
+
+[[move.package]]
+id = "SuiSystem"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/sui-system" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
 ]
 
 [[move.package]]
@@ -105,7 +145,7 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.39.4"
+compiler-version = "1.46.0"
 edition = "2024.beta"
 flavor = "sui"
 
@@ -114,5 +154,5 @@ flavor = "sui"
 [env.mainnet]
 chain-id = "35834a8a"
 original-published-id = "0xb3f10f2c9a52b615ab8b0b930ee55e019bacb407b29f5f534e6d9c3291341db8"
-latest-published-id = "0x2e641a878f41e34c384f52e81d76e2466349b4a436fee48a3425d45c81969537"
-published-version = "10"
+latest-published-id = "0x50e0e9e549574c2ab7ee24d37bffd38eaeb2e93e83bcac26aac081606ac68fae"
+published-version = "14"
