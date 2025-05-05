@@ -133,6 +133,21 @@ module bucket_periphery::bucket_operations {
         utils::transfer_non_zero_balance(buck_balance, debtor, ctx);
     }
 
+    public fun fully_repay_and_get_collateral<T>(
+        protocol: &mut BucketProtocol,
+        buck_coin: Coin<BUCK>,
+        clock: &Clock,
+        ctx: &mut TxContext,
+    ): Coin<T> {
+        let debtor = tx_context::sender(ctx);
+        let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, debtor, clock);
+        let mut buck_balance = coin::into_balance(buck_coin);
+        let buck_input = balance::split(&mut buck_balance, debt_amount);
+        let coll_output = buck::repay_debt<T>(protocol, buck_input, clock, ctx);
+        utils::transfer_non_zero_balance(buck_balance, debtor, ctx);   
+        coll_output.into_coin(ctx)
+    }
+
     public fun fully_repay_with_strap<T>(
         protocol: &mut BucketProtocol,
         strap: BottleStrap<T>,
@@ -150,6 +165,25 @@ module bucket_periphery::bucket_operations {
         utils::transfer_non_zero_balance(buck_balance, debtor, ctx);
         let bucket = buck::borrow_bucket<T>(protocol);
         bucket::destroy_empty_strap(bucket, strap);
+    }
+
+    public fun fully_repay_with_strap_and_get_collateral<T>(
+        protocol: &mut BucketProtocol,
+        strap: BottleStrap<T>,
+        buck_coin: Coin<BUCK>,
+        clock: &Clock,
+        ctx: &mut TxContext,
+    ): Coin<T> {
+        let debtor = tx_context::sender(ctx);
+        let strap_addr = strap::get_address(&strap);
+        let (_, debt_amount) = buck::get_bottle_info_with_interest_by_debtor<T>(protocol, strap_addr, clock);
+        let mut buck_balance = coin::into_balance(buck_coin);
+        let buck_input = balance::split(&mut buck_balance, debt_amount);
+        let coll_output = buck::repay_with_strap<T>(protocol, &strap, buck_input, clock);
+        utils::transfer_non_zero_balance(buck_balance, debtor, ctx);
+        let bucket = buck::borrow_bucket<T>(protocol);
+        bucket::destroy_empty_strap(bucket, strap);
+        coll_output.into_coin(ctx)
     }
 
     public fun redeem<T>(
