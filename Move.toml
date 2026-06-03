@@ -3,8 +3,8 @@ name = "BucketPeriphery"
 edition = "2024.beta"
 
 [dependencies]
-BucketProtocol = { git = "../v1-core", subdir = "protocol/", rev = "mainnet" }
-StrapFountain = { git = "../strap-fountain", rev = "mainnet" }
+BucketProtocol = { local = "../v1-core/protocol" }
+StrapFountain = { local = "../strap-fountain" }
 
 [addresses]
 bucket_periphery = "0x0"
